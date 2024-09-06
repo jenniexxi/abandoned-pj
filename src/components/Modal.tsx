@@ -28,12 +28,20 @@ const Modal = ({
   return (
     <BackDrop onClick={handleBackdropClick} $isAnimation={backDropAnimation}>
       {isAnimation ? (
-        <ModalView type={type}>{children}</ModalView>
+        <ModalView type={type}>
+          {children}
+        </ModalView>
       ) : (
         <>
-          {type === "center" && <CenterModalBody>{children}</CenterModalBody>}
-          {type === "top" && <TopModalBody>{children}</TopModalBody>}
-          {type === "bottom" && <BottomModalBody>{children}</BottomModalBody>}
+          {type === "center" && (
+            <CenterModalBody>{children}</CenterModalBody>
+          )}
+          {type === "top" && (
+            <TopModalBody>{children}</TopModalBody>
+          )}
+          {type === "bottom" && (
+            <BottomModalBody>{children}</BottomModalBody>
+          )}
           {type === "custom" && <>{children}</>}
         </>
       )}
@@ -82,7 +90,7 @@ const BackDrop = styled.div<{ $isAnimation: boolean }>`
     `}
 `;
 
-const ModalView = styled.div<{ type: Props["type"] }>`
+const ModalView = styled.div<{ type: Props["type"]; }>`
   position: fixed;
   left: 50%;
   transform: translateX(-50%);

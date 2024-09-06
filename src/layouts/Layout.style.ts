@@ -4,8 +4,8 @@ export const LayoutWrpper = styled.div`
   display: flex;
   width: 100%;
   max-width: 1024px;
-  margin: 0 auto;
   min-height: 800px;
-  padding: 20px 0 100px;
+  margin: 0 auto;
+  margin: 20px auto;
   gap: 20px;
 `;

@@ -1,102 +1,67 @@
 import { axiosInstance } from "./api";
 
-export type AnimalInfo = {
+export type MetaInfo = {
   id: number;
-  filename: string;
-  happenDt: string;
-  happenPlace: string;
-  parentKind: string;
+  memberName: string;
+  fciGroupCode: number;
+  country: string;
   kind: string;
-  colorCd: string;
-  age: string;
-  weight: string;
-  noticeNo: string;
-  noticeSdt: string;
-  noticeEdt: string;
-  popfile: string;
-  processState: string;
-  emergencyProcessState: string;
-  sexCd: "M" | "F" | "Q";
-  neuterYn: "Y" | "N" | "U";
-  specialMark: string;
-  careNm: string;
-  careTel: string;
-  sido: string;
-  sigungu: string;
-  orgNm: string;
-  chargeNm: string;
-  officetel: string;
-  isScrap: boolean;
-  imageList: string[];
+  childKindCodeList: number[];
+  matchingDataList: string[];
+  updatedAt: string;
+};
+
+export type MetaInfoList = {
+  message: string;
+  animalList: MetaInfo[];
+  count: number;
+  misMatchingCount: number;
 };
 
 const AnimalBreed = {
-  getDetail: (animalId: number): Promise<AnimalInfo[]> => {
-    const query = new URLSearchParams();
-    query.append("animalId", animalId.toString());
-    return axiosInstance
-      .get(`/api/v1/animals?${query.toString()}`)
-      .then((resp) => {
-        return resp.data;
-      })
-      .catch((e) => console.log(e));
-  },
-  getFilter: () => {
-    return axiosInstance
-      .get(`/api/v1/animals/filter`)
-      .then((resp) => {
-        return resp.data;
-      })
-      .catch((e) => console.log(e));
-  },
+  // getDetail: (id: number): Promise<MetaInfo[]> => {
+  //   const query = new URLSearchParams();
+  //   query.append("animalId", id.toString());
+  //   return axiosInstance
+  //     .get(`/bo/v1/animals/meta?${query.toString()}`)
+  //     .then((resp) => {
+  //       return resp.data;
+  //     })
+  //     .catch((e) => console.log(e));
+  // },
+  // getFilter: () => {
+  //   return axiosInstance
+  //     .get(`/bo/v1/animals/filter`)
+  //     .then((resp) => {
+  //       return resp.data;
+  //     })
+  //     .catch((e) => console.log(e));
+  // },
   getLists: (
-    parentKindCode?: string,
-    kindCode?: string[],
-    weightCode?: string[],
-    sortCode?: string,
-    ageCode?: string[],
-    genderCode?: string[],
-    processStateCode?: string[],
-    startDate?: string,
-    endDate?: string,
-    sidoCode?: string[]
-  ): Promise<AnimalInfo[]> => {
+    fciGroupCode?: number,
+    country?: string,
+    kind?: string,
+    page=1
+  ): Promise<MetaInfoList> => {
     const query = new URLSearchParams();
 
-    if (parentKindCode) {
-      query.append("parentKindCode", parentKindCode);
+    if (fciGroupCode) {
+      query.append("fciGroupCode", fciGroupCode.toString());
     }
-    if (kindCode) {
-      query.append("kindCode", kindCode.toString());
+    if (country) {
+      query.append("country", country);
     }
-    if (weightCode) {
-      query.append("weightCode", weightCode.toString());
+    if (kind) {
+      query.append("kind", kind);
     }
-    if (sortCode) {
-      query.append("sortCode", sortCode);
-    }
-    if (ageCode) {
-      query.append("ageCode", ageCode.toString());
-    }
-    if (genderCode) {
-      query.append("genderCode", genderCode.toString());
-    }
-    if (processStateCode) {
-      query.append("processStateCode", processStateCode.toString());
-    }
-    if (startDate) {
-      query.append("startDate", startDate);
-    }
-    if (endDate) {
-      query.append("endDate", endDate);
-    }
-    if (sidoCode) {
-      query.append("sidoCode", sidoCode.toString());
-    }
+    // append는 string 만 받을 수 있어서 형 변환 필수
+    query.append("page", page.toString());
+    query.append("size", "25");
 
     return axiosInstance
-      .get(`/api/v1/animals?${query.toString()}`)
+      .get(`/bo/v1/animals/meta?${query.toString()}`)
       .then((resp) => {
+        console.log(resp.data);
         return resp.data;
       })
       .catch((e) => console.log(e));

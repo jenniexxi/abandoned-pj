@@ -5,15 +5,17 @@ export const Asidewrap = styled.aside`
   width: 250px;
   height: 100%;
   min-height: 800px;
+  flex-shrink: 0;
 `;
 
 export const LogoBox = styled.div`
-  background-color: #f1f3f5;
+  background-color: #f7e4ff;
   height: 100px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  border-radius: 10px;
 `;
 
 export const Title = styled.div`
@@ -24,8 +26,10 @@ export const Title = styled.div`
 
 export const MenuList = styled.nav`
   margin-top: 30px;
-  background-color: #f1f3f5;
-  height: 600px;
+  background-color: #f7e4ff;
+  height: 100%;
+  min-height: 600px;
+  border-radius: 10px;
   li {
   }
 `;
