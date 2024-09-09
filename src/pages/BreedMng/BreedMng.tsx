@@ -4,10 +4,11 @@ import Portal from "../../components/Portal";
 // import { useQueryClient } from "@tanstack/react-query";
 import { useQuery } from "@tanstack/react-query";
 import * as S from "./BreedMng.style";
-import AnimalBreed from "../../api/AnimalBreed";
+import AnimalBreed, { MetaInfo } from "../../api/AnimalBreed";
 import Selector, { ListItem } from "../../components/Selector/Selector";
-import { COUNTRY, FCI_GROUP, OPTIONS } from "./constants";
+import { OPTIONS } from "./constants";
 import dayjs from "dayjs";
+import Pagination from "../../components/Pagination/Pagination";
 
 type PopupType = "type1" | "type2" | "type3";
 
@@ -17,8 +18,11 @@ const BreedMng = () => {
   // const [selectedCountry, setSelectedCountry] = useState<string | undefined>();
   // const [breed, setBreed] = useState<string | undefined>();
 
-  const [selectValue, setSelectValue] = useState<ListItem>();
+  const [selectFCI, setSelectFCI] = useState<ListItem>();
+  const [selectCountry, setSelectCountry] = useState<ListItem>();
+  const [selectedItem, setSelectedItem] = useState<MetaInfo>();
   const [popupType, setPopupType] = useState<PopupType>("type1");
+  const [page, setPage] = useState(0);
 
   const popupOpen = (type: PopupType) => {
     setPopupType(type);
@@ -32,9 +36,15 @@ const BreedMng = () => {
   // const queryClient = useQueryClient();
 
   const { data } = useQuery({
-    queryKey: ["getBreed"],
-    queryFn: () => AnimalBreed.getLists(),
+    // queryKey에서 page 의 역할은 useEffect 와 동일
+    queryKey: ["getBreed", page],
+    queryFn: () =>
+      AnimalBreed.getLists(undefined, undefined, undefined, page + 1),
   });
+
+  const onClickListTr = (selectedItem: MetaInfo) => {
+    setSelectedItem(selectedItem);
+  };
 
   return (
     <>
@@ -43,33 +53,30 @@ const BreedMng = () => {
           <S.OptionBox>
             <S.OptionTitle>FCI 그룹</S.OptionTitle>
             <Selector
-              selected={selectValue?.label}
+              selected={selectFCI?.label}
               placeholder="선택해주세요"
-              list={OPTIONS}
-              onSelected={(item) => setSelectValue(item)}
-              width="100px"
+              list={
+                data?.metaAnimalSearch.fciGroupCodeList.map((item) => {
+                  return { label: item.toString(), value: item.toString() };
+                }) || []
+              }
+              onSelected={(item) => setSelectFCI(item)}
+              width="110px"
             />
-
-
-            <select>
-              {FCI_GROUP.map((item) => (
-                <option value={item.value} key={"FCI" + item.value}>
-                  {item.label}
-                </option>
-              ))}
-            </select>
           </S.OptionBox>
           <S.OptionBox>
             <S.OptionTitle>출생국</S.OptionTitle>
-            <select>
-              {COUNTRY.map((item, index) => (
-                <option key={index} value={item.value}>
-                  {item.value}
-                </option>
-              ))}
-              <option value="">전체</option>
-              <option value="">옵션1</option>
-            </select>
+            <Selector
+              selected={selectCountry?.label}
+              placeholder="선택해주세요"
+              list={
+                data?.metaAnimalSearch.countryList.map((item) => {
+                  return { label: item.toString(), value: item.toString() };
+                }) || []
+              }
+              onSelected={(item) => setSelectCountry(item)}
+              width="150px"
+            />
           </S.OptionBox>
           <S.OptionBox>
             <input type="text" placeholder="품종을 입력해주세요" />
@@ -83,7 +90,6 @@ const BreedMng = () => {
               <p>
                 *총 <span>0</span>건의 미매칭 데이터가 있습니다.
               </p>
-              <button onClick={() => popupOpen("type1")}>상세 보기</button>
               <button onClick={() => popupOpen("type2")}>신규 작성</button>
             </S.InfoBox>
           </S.TableInfoWrap>
@@ -101,7 +107,13 @@ const BreedMng = () => {
               </thead>
               <tbody>
                 {data?.animalList.map((item) => (
-                  <tr key={item.id}>
+                  <tr
+                    key={item.id}
+                    onClick={() => {
+                      onClickListTr(item);
+                      popupOpen("type1");
+                    }}
+                  >
                     <td>{item.id}</td>
                     <td>{item.kind}</td>
                     <td>{item.country}</td>
@@ -119,24 +131,21 @@ const BreedMng = () => {
             </table>
           </S.TableContainer>
         </S.ContentWrap>
-        <S.PagingWrap>
-          <S.BtnFirst>&lt;&lt;</S.BtnFirst>
-          <S.BtnPrev>&lt;</S.BtnPrev>
-          <button>1</button>
-          <button>2</button>
-          <button>3</button>
-          <button>4</button>
-          <button>5</button>
-          <S.BtnNext>&gt;</S.BtnNext>
-          <S.BtnEnd>&gt;&gt;</S.BtnEnd>
-        </S.PagingWrap>
+        <Pagination
+          currentPage={page}
+          totalCount={data?.count || 0}
+          // totalCount={575}
+          onClickPage={(page) => setPage(page)}
+        />
       </S.Container>
       {isPopup && (
         <Portal>
           <Modal
             type="center"
             backDropAnimation={false}
-            onClickBackDrop={popupClose}
+            // onClickBackDrop={popupClose}
+            // isCloseBtn={false}
+            onHide={popupClose}
           >
             {popupType === "type1" && (
               <S.PopContainer>
@@ -145,38 +154,26 @@ const BreedMng = () => {
                   <li>
                     <h3>하위 품종</h3>
                     <S.DataBox>
-                      <span>토이 푸들</span>
-                      <span>미디엄 푸들</span>
-                      <span>미니어처 푸들</span>
-                      <span>스탠다드 푸들</span>
-                      <span>토이 푸들</span>
-                      <span>토이 푸들</span>
-                      <span>토이 푸들</span>
-                      <span>토이 푸들</span>
+                      {selectedItem?.childKindCodeList.map((item) => (
+                        <span>{item}</span>
+                      ))}
                     </S.DataBox>
                   </li>
                   <li>
                     <h3>매칭 데이터</h3>
                     <S.DataBox>
-                      <span>푸들</span>
-                      <span>토이 푸들</span>
-                      <span>푸들</span>
-                      <span>토이 푸들</span>
-                      <span>푸들</span>
-                      <span>토이 푸들</span>
-                      <span>푸들</span>
-                      <span>토이 푸들</span>
-                      <span>푸들</span>
-                      <span>토이 푸들</span>
+                      {selectedItem?.matchingDataList.map((item) => (
+                        <span>{item}</span>
+                      ))}
                     </S.DataBox>
                   </li>
                   <S.ListType>
                     <h3>FCI 그룹 : </h3>
-                    <span>8</span>
+                    <span>{selectedItem?.fciGroupCode}</span>
                   </S.ListType>
                   <S.ListType>
                     <h3>출생지 : </h3>
-                    <span>프랑스</span>
+                    <span>{selectedItem?.country}</span>
                   </S.ListType>
                 </S.VarietyList>
                 <S.ButtonRow>
@@ -186,6 +183,7 @@ const BreedMng = () => {
             )}
             {popupType === "type2" && (
               <S.PopContainer>
+                <h2>신규 작성</h2>
                 <S.CreateForm>
                   <ul>
                     <li>
@@ -195,30 +193,39 @@ const BreedMng = () => {
                     <li>
                       <h3>하위 품종</h3>
                       <Selector
-                        selected={selectValue?.label}
+                        selected={selectFCI?.label}
                         placeholder="선택해주세요"
                         list={OPTIONS}
-                        onSelected={(item) => setSelectValue(item)}
+                        onSelected={(item) => setSelectFCI(item)}
                         width="150px"
                       />
                     </li>
                     <li>
                       <h3>매칭 데이터</h3>
                       <Selector
-                        selected={selectValue?.label}
+                        selected={selectFCI?.label}
                         placeholder="선택해주세요"
                         list={OPTIONS}
-                        onSelected={(item) => setSelectValue(item)}
+                        onSelected={(item) => setSelectFCI(item)}
                         width="150px"
                       />
                     </li>
                     <li>
                       <h3>FCI 그룹</h3>
                       <Selector
-                        selected={selectValue?.label}
+                        selected={selectFCI?.label}
                         placeholder="선택해주세요"
-                        list={OPTIONS}
-                        onSelected={(item) => setSelectValue(item)}
+                        list={
+                          data?.metaAnimalSearch.fciGroupCodeList.map(
+                            (item) => {
+                              return {
+                                label: item.toString(),
+                                value: item.toString(),
+                              };
+                            }
+                          ) || []
+                        }
+                        onSelected={(item) => setSelectFCI(item)}
                         width="150px"
                       />
                     </li>

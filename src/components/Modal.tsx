@@ -6,6 +6,8 @@ type Props = {
   type?: "center" | "top" | "bottom" | "custom";
   isAnimation?: boolean;
   backDropAnimation?: boolean;
+  isCloseBtn?: boolean;
+  onHide?: () => void;
 };
 
 const Modal = ({
@@ -14,6 +16,8 @@ const Modal = ({
   type = "center",
   isAnimation = true,
   backDropAnimation = true,
+  isCloseBtn = true,
+  onHide,
 }: Props) => {
   const handleBackdropClick = (
     e: React.MouseEvent<HTMLElement, MouseEvent>
@@ -30,18 +34,13 @@ const Modal = ({
       {isAnimation ? (
         <ModalView type={type}>
           {children}
+          {isCloseBtn && <PopCloseBtn onClick={onHide}>X</PopCloseBtn>}
         </ModalView>
       ) : (
         <>
-          {type === "center" && (
-            <CenterModalBody>{children}</CenterModalBody>
-          )}
-          {type === "top" && (
-            <TopModalBody>{children}</TopModalBody>
-          )}
-          {type === "bottom" && (
-            <BottomModalBody>{children}</BottomModalBody>
-          )}
+          {type === "center" && <CenterModalBody>{children}</CenterModalBody>}
+          {type === "top" && <TopModalBody>{children}</TopModalBody>}
+          {type === "bottom" && <BottomModalBody>{children}</BottomModalBody>}
           {type === "custom" && <>{children}</>}
         </>
       )}
@@ -90,11 +89,10 @@ const BackDrop = styled.div<{ $isAnimation: boolean }>`
     `}
 `;
 
-const ModalView = styled.div<{ type: Props["type"]; }>`
+const ModalView = styled.div<{ type: Props["type"] }>`
   position: fixed;
   left: 50%;
   transform: translateX(-50%);
-
   ${({ type }) => {
     switch (type) {
       case "center":
@@ -138,6 +136,14 @@ const BottomModalBody = styled.div`
   bottom: 0;
   left: 50%;
   transform: translateX(-50%);
+`;
+
+const PopCloseBtn = styled.button`
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background-color: #fff;
+  padding: 10px;
 `;
 
 export default Modal;

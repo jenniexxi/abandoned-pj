@@ -18,8 +18,10 @@ export const TopWrap = styled.div`
 `;
 
 export const OptionBox = styled.div`
-  margin-right: 20px;
-  &last-child {
+  margin-right: 10px;
+  display: flex;
+  align-items: center;
+  &:last-child {
     margin-right: 0;
   }
   select {
@@ -46,7 +48,7 @@ export const OptionBox = styled.div`
 export const OptionTitle = styled.span`
   font-size: ${({ theme }) => theme.fontSize.md};
   font-weight: ${({ theme }) => theme.fontWeight.medium};
-  margin-right: 10px;
+  margin-right: 5px;
 `;
 
 export const ContentWrap = styled.div``;
@@ -82,6 +84,7 @@ export const TableContainer = styled.div`
   text-align: center;
   margin-top: 10px;
   border-radius: 10px;
+  margin-bottom: 30px;
   table {
     width: 100%;
     font-size: ${({ theme }) => theme.fontSize.md};
@@ -155,7 +158,7 @@ export const BtnEnd = styled.button``;
 export const PopContainer = styled.div`
   background-color: #fff;
   border-radius: 12px;
-  padding: 30px 20px;
+  padding: 30px;
   width: 450px;
   h2 {
     font-size: 18px;
@@ -168,7 +171,7 @@ export const VarietyList = styled.ul`
   padding-bottom: 15px;
   li {
     + li {
-      margin-top: 15px;
+      margin-top: 20px;
     }
     h3 {
       font-size: 16px;
@@ -203,7 +206,7 @@ export const ButtonRow = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
   grid-gap: 10px;
-  margin-top: 20px;
+  margin-top: 30px;
   button {
     display: flex;
     align-items: center;

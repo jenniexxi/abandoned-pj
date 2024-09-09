@@ -56,6 +56,7 @@ const GlobalStyles = createGlobalStyle`
     }
     button, select {
         border: none;
+        cursor: pointer;
     }
     textarea {
         outline: none;

@@ -13,6 +13,7 @@ export type MetaInfo = {
 
 export type MetaInfoList = {
   message: string;
+  metaAnimalSearch: { fciGroupCodeList: number[]; countryList: string[] };
   animalList: MetaInfo[];
   count: number;
   misMatchingCount: number;
@@ -41,7 +42,7 @@ const AnimalBreed = {
     fciGroupCode?: number,
     country?: string,
     kind?: string,
-    page=1
+    page = 1
   ): Promise<MetaInfoList> => {
     const query = new URLSearchParams();
 
