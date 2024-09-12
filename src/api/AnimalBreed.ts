@@ -11,12 +11,28 @@ export type MetaInfo = {
   updatedAt: string;
 };
 
+export type DetailMetaInfo = MetaInfo & {};
+
 export type MetaInfoList = {
   message: string;
   metaAnimalSearch: { fciGroupCodeList: number[]; countryList: string[] };
   animalList: MetaInfo[];
   count: number;
   misMatchingCount: number;
+};
+
+export type ReqCreateMetaList = {
+  memberId: number;
+  fciGroupCode: number;
+  country: string;
+  kind: string;
+  childKindCodeList: number[];
+  matchingDataList: string[];
+};
+
+export type RespCreateMetaList = ReqCreateMetaList & {
+  message: string;
+  id: number;
 };
 
 const AnimalBreed = {
@@ -57,10 +73,29 @@ const AnimalBreed = {
     }
     // append는 string 만 받을 수 있어서 형 변환 필수
     query.append("page", page.toString());
-    query.append("size", "25");
+    query.append("size", "20");
 
     return axiosInstance
-      .get(`/bo/v1/animals/meta?${query.toString()}`)
+      .get(`bo/v1/animals/meta?${query.toString()}`)
+      .then((resp) => {
+        console.log(resp.data);
+        return resp.data;
+      })
+      .catch((e) => console.log(e));
+  },
+  createLists: async (body: ReqCreateMetaList): Promise<RespCreateMetaList> => {
+    const tempBody = {
+      ...body,
+      memberId: 0,
+      fciGroupCode: 1,
+    };
+    const result = await axiosInstance.post(`bo/v1/animals/meta`, tempBody);
+
+    return result.data;
+  },
+  detailLists: (metaAnimalId: number): Promise<MetaInfo> => {
+    return axiosInstance
+      .get(`bo/v1/animals/meta/${metaAnimalId}`)
       .then((resp) => {
         console.log(resp.data);
         return resp.data;

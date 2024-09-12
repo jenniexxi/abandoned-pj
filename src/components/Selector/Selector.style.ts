@@ -1,11 +1,14 @@
-import styled from "styled-components";
+import styled, { css } from "styled-components";
 
 export const SelectBox = styled.div<{ $width?: string }>`
   width: ${(props) => props.$width || "200px"};
   position: relative;
 `;
 
-export const ItemSelect = styled.div<{ $isOpen?: boolean }>`
+export const ItemSelect = styled.div<{
+  $isOpen?: boolean;
+  $isPlaceholder: boolean;
+}>`
   width: 100%;
   height: 35px;
   border: 1px solid ${({ $isOpen }) => ($isOpen ? "#f7e4ff" : "#ccc")};
@@ -13,9 +16,16 @@ export const ItemSelect = styled.div<{ $isOpen?: boolean }>`
   border-radius: 6px;
   display: flex;
   align-items: center;
-  padding-left: 10px;
+  justify-content: space-between;
+  padding: 0 6px 0 10px;
   background-color: #fff;
   cursor: pointer;
+  ${({ $isPlaceholder }) =>
+    $isPlaceholder
+      ? css`
+          color: #ccc;
+        `
+      : css``}
 `;
 
 export const ItemList = styled.ul`

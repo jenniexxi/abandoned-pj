@@ -56,7 +56,9 @@ const Pagination = ({
   };
   return (
     <S.PagingWrap>
-      <S.BtnFirst onClick={moveToFirst}>&lt;&lt;</S.BtnFirst>
+      <S.BtnFirst onClick={moveToFirst} disabled={currentPage === 0}>
+        &lt;&lt;
+      </S.BtnFirst>
       <S.BtnPrev onClick={moveToBefore} disabled={currentPage === 0}>
         &lt;
       </S.BtnPrev>
@@ -64,7 +66,9 @@ const Pagination = ({
       <S.BtnNext onClick={moveToAfter} disabled={currentPage === totalPage - 1}>
         &gt;
       </S.BtnNext>
-      <S.BtnEnd onClick={moveToLast}>&gt;&gt;</S.BtnEnd>
+      <S.BtnEnd onClick={moveToLast} disabled={currentPage === totalPage - 1}>
+        &gt;&gt;
+      </S.BtnEnd>
     </S.PagingWrap>
   );
 };

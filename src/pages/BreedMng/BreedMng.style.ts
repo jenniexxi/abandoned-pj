@@ -231,8 +231,10 @@ export const CreateForm = styled.form`
       margin-bottom: 10px;
       h3 {
         font-weight: bold;
+        flex-shrink: 0;
       }
       input {
+        flex: 1;
       }
     }
   }
@@ -243,4 +245,9 @@ export const PopInput = styled.input`
   border: 1px solid #ccc;
   border-radius: 10px;
   padding: 0 10px;
+`;
+
+export const ErrorMsg = styled.div`
+  font-size: 12px;
+  color: #f00;
 `;

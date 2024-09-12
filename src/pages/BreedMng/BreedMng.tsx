@@ -6,9 +6,10 @@ import { useQuery } from "@tanstack/react-query";
 import * as S from "./BreedMng.style";
 import AnimalBreed, { MetaInfo } from "../../api/AnimalBreed";
 import Selector, { ListItem } from "../../components/Selector/Selector";
-import { OPTIONS } from "./constants";
 import dayjs from "dayjs";
 import Pagination from "../../components/Pagination/Pagination";
+import PopupType01 from "./features/PopupType01";
+import PopupType02 from "./features/PopupType02";
 
 type PopupType = "type1" | "type2" | "type3";
 
@@ -41,6 +42,10 @@ const BreedMng = () => {
     queryFn: () =>
       AnimalBreed.getLists(undefined, undefined, undefined, page + 1),
   });
+
+  // const createAnimal = useMutation({
+  //   mutationFn: () => createLists()
+  // })
 
   const onClickListTr = (selectedItem: MetaInfo) => {
     setSelectedItem(selectedItem);
@@ -101,7 +106,7 @@ const BreedMng = () => {
                   <th>품종</th>
                   <th>출생지</th>
                   <th>매칭 데이터 수</th>
-                  <th>최근 작업일 |작업자</th>
+                  <th>최근 작업일 | 작업자</th>
                   <th></th>
                 </tr>
               </thead>
@@ -114,7 +119,7 @@ const BreedMng = () => {
                       popupOpen("type1");
                     }}
                   >
-                    <td>{item.id}</td>
+                    <td>{item.fciGroupCode}</td>
                     <td>{item.kind}</td>
                     <td>{item.country}</td>
                     <td>{item.matchingDataList.length}</td>
@@ -133,8 +138,8 @@ const BreedMng = () => {
         </S.ContentWrap>
         <Pagination
           currentPage={page}
-          totalCount={data?.count || 0}
-          // totalCount={575}
+          // totalCount={data?.count || 0}
+          totalCount={575}
           onClickPage={(page) => setPage(page)}
         />
       </S.Container>
@@ -148,98 +153,9 @@ const BreedMng = () => {
             onHide={popupClose}
           >
             {popupType === "type1" && (
-              <S.PopContainer>
-                <h2>푸들</h2>
-                <S.VarietyList>
-                  <li>
-                    <h3>하위 품종</h3>
-                    <S.DataBox>
-                      {selectedItem?.childKindCodeList.map((item) => (
-                        <span>{item}</span>
-                      ))}
-                    </S.DataBox>
-                  </li>
-                  <li>
-                    <h3>매칭 데이터</h3>
-                    <S.DataBox>
-                      {selectedItem?.matchingDataList.map((item) => (
-                        <span>{item}</span>
-                      ))}
-                    </S.DataBox>
-                  </li>
-                  <S.ListType>
-                    <h3>FCI 그룹 : </h3>
-                    <span>{selectedItem?.fciGroupCode}</span>
-                  </S.ListType>
-                  <S.ListType>
-                    <h3>출생지 : </h3>
-                    <span>{selectedItem?.country}</span>
-                  </S.ListType>
-                </S.VarietyList>
-                <S.ButtonRow>
-                  <button type="button">수정</button>
-                </S.ButtonRow>
-              </S.PopContainer>
+              <PopupType01 selectedItemId={selectedItem?.id} />
             )}
-            {popupType === "type2" && (
-              <S.PopContainer>
-                <h2>신규 작성</h2>
-                <S.CreateForm>
-                  <ul>
-                    <li>
-                      <h3>품종</h3>
-                      <S.PopInput type="text" />
-                    </li>
-                    <li>
-                      <h3>하위 품종</h3>
-                      <Selector
-                        selected={selectFCI?.label}
-                        placeholder="선택해주세요"
-                        list={OPTIONS}
-                        onSelected={(item) => setSelectFCI(item)}
-                        width="150px"
-                      />
-                    </li>
-                    <li>
-                      <h3>매칭 데이터</h3>
-                      <Selector
-                        selected={selectFCI?.label}
-                        placeholder="선택해주세요"
-                        list={OPTIONS}
-                        onSelected={(item) => setSelectFCI(item)}
-                        width="150px"
-                      />
-                    </li>
-                    <li>
-                      <h3>FCI 그룹</h3>
-                      <Selector
-                        selected={selectFCI?.label}
-                        placeholder="선택해주세요"
-                        list={
-                          data?.metaAnimalSearch.fciGroupCodeList.map(
-                            (item) => {
-                              return {
-                                label: item.toString(),
-                                value: item.toString(),
-                              };
-                            }
-                          ) || []
-                        }
-                        onSelected={(item) => setSelectFCI(item)}
-                        width="150px"
-                      />
-                    </li>
-                    <li>
-                      <h3>출생지 :</h3>
-                      <S.PopInput type="text" />
-                    </li>
-                  </ul>
-                </S.CreateForm>
-                <S.ButtonRow>
-                  <button type="button">저장</button>
-                </S.ButtonRow>
-              </S.PopContainer>
-            )}
+            {popupType === "type2" && <PopupType02 />}
             {popupType === "type3" && <></>}
           </Modal>
         </Portal>
