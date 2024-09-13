@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Modal from "../../components/Modal";
 import Portal from "../../components/Portal";
 // import { useQueryClient } from "@tanstack/react-query";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import * as S from "./BreedMng.style";
-import AnimalBreed, { MetaInfo } from "../../api/AnimalBreed";
+import AnimalBreed, { MetaInfo, MetaInfoList } from "../../api/AnimalBreed";
 import Selector, { ListItem } from "../../components/Selector/Selector";
 import dayjs from "dayjs";
 import Pagination from "../../components/Pagination/Pagination";
@@ -24,6 +24,10 @@ const BreedMng = () => {
   const [selectedItem, setSelectedItem] = useState<MetaInfo>();
   const [popupType, setPopupType] = useState<PopupType>("type1");
   const [page, setPage] = useState(0);
+  const [searchInput, setSearchInput] = useState("");
+  const [searhResult, setSearhResult] = useState<MetaInfoList>();
+
+  // const queryClient = useQueryClient();
 
   const popupOpen = (type: PopupType) => {
     setPopupType(type);
@@ -34,14 +38,18 @@ const BreedMng = () => {
     setIsPopup(false);
   };
 
-  // const queryClient = useQueryClient();
+  // const { data } = useQuery({
+  //   // queryKey에서 page 의 역할은 useEffect 와 동일
+  //   queryKey: ["getBreed", page],
+  //   queryFn: () =>
+  //     AnimalBreed.getLists(undefined, undefined, undefined, page + 1),
+  // });
 
-  const { data } = useQuery({
-    // queryKey에서 page 의 역할은 useEffect 와 동일
-    queryKey: ["getBreed", page],
-    queryFn: () =>
-      AnimalBreed.getLists(undefined, undefined, undefined, page + 1),
-  });
+  useEffect(() => {
+    AnimalBreed.getLists(undefined, undefined, undefined, page + 1).then(
+      (resp) => setSearhResult(resp)
+    );
+  }, [page]);
 
   // const createAnimal = useMutation({
   //   mutationFn: () => createLists()
@@ -50,6 +58,29 @@ const BreedMng = () => {
   const onClickListTr = (selectedItem: MetaInfo) => {
     setSelectedItem(selectedItem);
   };
+
+  const mutation = useMutation({
+    mutationFn: () => {
+      // 내가 입력한 값, 실행하는 함수
+      return AnimalBreed.getLists(
+        selectFCI ? Number(selectFCI.value) : undefined,
+        selectCountry?.value,
+        searchInput
+      );
+    },
+    onSuccess: (resp) => {
+      setSearhResult(resp);
+      console.log(resp);
+    },
+    onError: (error) => {
+      console.error("error", error);
+    },
+  });
+
+  // const resetSearchData = () =>{
+  //   setSearhResult()
+  //   queryClient.invalidateQueries({ queryKey: ["getBreed", page] });
+  // }
 
   return (
     <>
@@ -61,7 +92,7 @@ const BreedMng = () => {
               selected={selectFCI?.label}
               placeholder="선택해주세요"
               list={
-                data?.metaAnimalSearch.fciGroupCodeList.map((item) => {
+                searhResult?.metaAnimalSearch.fciGroupCodeList.map((item) => {
                   return { label: item.toString(), value: item.toString() };
                 }) || []
               }
@@ -75,7 +106,7 @@ const BreedMng = () => {
               selected={selectCountry?.label}
               placeholder="선택해주세요"
               list={
-                data?.metaAnimalSearch.countryList.map((item) => {
+                searhResult?.metaAnimalSearch.countryList.map((item) => {
                   return { label: item.toString(), value: item.toString() };
                 }) || []
               }
@@ -84,13 +115,18 @@ const BreedMng = () => {
             />
           </S.OptionBox>
           <S.OptionBox>
-            <input type="text" placeholder="품종을 입력해주세요" />
-            <button>검색</button>
+            <input
+              type="text"
+              placeholder="품종을 입력해주세요"
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+            />
+            <button onClick={() => mutation.mutate()}>검색</button>
           </S.OptionBox>
         </S.TopWrap>
         <S.ContentWrap>
           <S.TableInfoWrap>
-            <S.SearchCase>{data?.count}건</S.SearchCase>
+            <S.SearchCase>{searhResult?.count}건</S.SearchCase>
             <S.InfoBox>
               <p>
                 *총 <span>0</span>건의 미매칭 데이터가 있습니다.
@@ -111,7 +147,7 @@ const BreedMng = () => {
                 </tr>
               </thead>
               <tbody>
-                {data?.animalList.map((item) => (
+                {searhResult?.animalList.map((item) => (
                   <tr
                     key={item.id}
                     onClick={() => {
