@@ -47,7 +47,9 @@ const BreedMng = () => {
 
   useEffect(() => {
     AnimalBreed.getLists(undefined, undefined, undefined, page + 1).then(
-      (resp) => setSearhResult(resp)
+      (resp) => {setSearhResult(resp);
+        console.log(resp)
+      }
     );
   }, [page]);
 
@@ -129,7 +131,7 @@ const BreedMng = () => {
             <S.SearchCase>{searhResult?.count}건</S.SearchCase>
             <S.InfoBox>
               <p>
-                *총 <span>0</span>건의 미매칭 데이터가 있습니다.
+                *총 <span>{searhResult?.misMatchingCount}</span>건의 미매칭 데이터가 있습니다.
               </p>
               <button onClick={() => popupOpen("type2")}>신규 작성</button>
             </S.InfoBox>
@@ -158,7 +160,7 @@ const BreedMng = () => {
                     <td>{item.fciGroupCode}</td>
                     <td>{item.kind}</td>
                     <td>{item.country}</td>
-                    <td>{item.matchingDataList.length}</td>
+                    <td>{item.externalDataList?.length || 0}</td>
                     <td>
                       {dayjs(item.updatedAt).format("YY.MM.DD")} |
                       {item.memberName}
@@ -189,9 +191,14 @@ const BreedMng = () => {
             onHide={popupClose}
           >
             {popupType === "type1" && (
-              <PopupType01 selectedItemId={selectedItem?.id} />
+              <PopupType01 selectedItem={selectedItem} />
             )}
-            {popupType === "type2" && <PopupType02 />}
+            {popupType === "type2" && (
+              <PopupType02
+                onPopClose={popupClose}
+                externalItem={selectedItem?.externalDataList}
+              />
+            )}
             {popupType === "type3" && <></>}
           </Modal>
         </Portal>

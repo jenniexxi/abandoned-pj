@@ -251,3 +251,25 @@ export const ErrorMsg = styled.div`
   font-size: 12px;
   color: #f00;
 `;
+
+export const ListItem = styled.li`
+  display: block !important;
+`;
+
+export const PartBox = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 10px;
+`;
+
+export const TagBox = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+  span {
+    padding: 10px;
+    border-radius: 10px;
+    background-color: #d8d8d8;
+  }
+`;

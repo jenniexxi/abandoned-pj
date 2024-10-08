@@ -44,7 +44,6 @@ const Selector = ({
   const handleOpen = () => {
     setIsOpen(!isOpen);
   };
-  console.log(!selected);
 
   return (
     <S.SelectBox ref={selectorRef} onClick={handleOpen} $width={width}>

@@ -4,12 +4,32 @@ import AnimalBreed, { ReqCreateMetaList } from "../../../api/AnimalBreed";
 import { useNavigate } from "react-router-dom";
 import Selector, { ListItem } from "../../../components/Selector/Selector";
 import { FCI_GROUP } from "../constants";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import MultiSelector from "../../../components/Selector/MultiSelector";
 
-const PopupType02 = () => {
+type Props = {
+  externalItem?: string[];
+  childKindItem?: { id: number; kind: string }[];
+  onPopClose?: () => void;
+};
+
+const PopupType02 = ({ externalItem, childKindItem, onPopClose }: Props) => {
   const navigate = useNavigate();
 
   const [selectedListItem, setSelectedListItem] = useState<ListItem>();
+  const [matchingListItem, setMatchingListItem] = useState<ListItem>();
+  const [selectChildKind, setSelectChildKind] = useState<ListItem>();
+
+  const [childKind, setChildKind] = useState<ListItem[]>([]);
+  const [matchingData, setMatchingData] = useState<ListItem[]>([]);
+
+  // fetchedExternalItem : 매칭
+  const [fetchedExternalItem, setFetchedExternalItem] = useState<string[]>(
+    externalItem || []
+  );
+  const [fetchedChildKindItem, setFetchedChildKindItem] = useState<
+    { id: number; kind: string }[]
+  >(childKindItem || []);
 
   const {
     register,
@@ -17,11 +37,57 @@ const PopupType02 = () => {
     formState: { errors },
   } = useForm<ReqCreateMetaList>();
 
+  const fetchData = async () => {
+    try {
+      const response = await AnimalBreed.getListsPop();
+      console.log("Fetched response:", response);
+      if (response) {
+        setFetchedExternalItem(response.externalDataList || []);
+        setFetchedChildKindItem(response.childKindMetaAnimalList || []);
+      }
+    } catch (error) {
+      console.error("데이터 조회에 실패했습니다:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (!externalItem || !childKindItem) {
+      console.log("성공");
+      fetchData();
+    }
+  }, [externalItem, childKindItem]);
+
+  const childKindList: ListItem[] = fetchedChildKindItem.map((item) => ({
+    label: item.kind,
+    value: item.id.toString(),
+  }));
+
+  const externalItemList: ListItem[] = fetchedExternalItem.map((item) => ({
+    label: item,
+    value: item,
+  }));
+
   const submitForm: SubmitHandler<ReqCreateMetaList> = async (data) => {
     try {
-      await AnimalBreed.createLists(data);
+      await AnimalBreed.createLists(
+        {
+          ...data,
+          // childKindCodeList 가져오는 값이 이상함
+          childKindCodeList: childKind.map((item) => {
+            return { id: parseInt(item.value), kind: item.label };
+          }),
+          externalDataList: matchingData.map((item) => item.label),
+        },
+        0,
+        parseInt(selectedListItem?.value || "1")
+      );
       alert("등록 완료");
-      navigate("/");
+
+      if (onPopClose) {
+        onPopClose();
+      }
+
+      navigate(0);
     } catch (e) {
       console.log("등록에 실패했습니다:", e);
       alert("등록에 실패했습니다. 다시 시도해주세요.");
@@ -43,25 +109,59 @@ const PopupType02 = () => {
             />
             <S.ErrorMsg>{errors.kind?.message}</S.ErrorMsg>
           </li>
+          <MultiSelector
+            selected={selectChildKind?.label}
+            placeholder="선택해주세요"
+            list={childKindList}
+            onSelected={(item) => {
+              setSelectChildKind(item);
+            }}
+            title="하위 품종"
+            width="150px"
+            selectedItem={setChildKind}
+          />
+          {/* <S.ListItem>
+            <S.PartBox>
+              <h3>하위 품종</h3>
+              <MultiSelector
+                selected={selectChildKind?.label}
+                placeholder="선택해주세요"
+                list={childKindList}
+                onSelected={(item) => {
+                  setSelectChildKind(item);
+                  setChildKind((prev) => {
+                    const list = new Set([...prev, item.label]);
+                    return [...list];
+                  });
+                }}
+                width="150px"
+              />
+            </S.PartBox>
+            <S.TagBox>
+              {childKind.map((item) => (
+                <span
+                  onClick={() => {
+                    const result = childKind.filter((childKind) => 
+                      childKind !== item
+                    );
+                    setChildKind(result)
+                  }}
+                >
+                  {item}
+                </span>
+              ))}
+            </S.TagBox>
+          </S.ListItem> */}
           <li>
-            <h3>하위 품종</h3>
-            {/* <Selector
-              selected={selectFCI?.label}
+            <MultiSelector
+              selected={matchingListItem?.label}
               placeholder="선택해주세요"
-              list={OPTIONS}
-              onSelected={(item) => setSelectFCI(item)}
+              list={externalItemList}
+              onSelected={(item) => setMatchingListItem(item)}
               width="150px"
-            /> */}
-          </li>
-          <li>
-            <h3>매칭 데이터</h3>
-            {/* <Selector
-              selected={selectFCI?.label}
-              placeholder="선택해주세요"
-              list={OPTIONS}
-              onSelected={(item) => setSelectFCI(item)}
-              width="150px"
-            /> */}
+              title="매칭 데이터"
+              selectedItem={setMatchingData}
+            />
           </li>
           <li>
             <h3>FCI 그룹</h3>

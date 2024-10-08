@@ -52,3 +52,25 @@ export const ItemList = styled.ul`
     }
   }
 `;
+
+export const ListItem = styled.li`
+  display: block !important;
+`;
+export const PartBox = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 10px;
+`;
+export const TagBox = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+  span {
+    font-size: 12px;
+    padding: 8px 12px;
+    border-radius: 12px;
+    background-color: #f7e4ff;
+    cursor: pointer;
+  }
+`;

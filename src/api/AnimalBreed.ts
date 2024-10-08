@@ -7,11 +7,11 @@ export type MetaInfo = {
   country: string;
   kind: string;
   childKindCodeList: number[];
-  matchingDataList: string[];
+  externalDataList: string[];
   updatedAt: string;
 };
 
-export type DetailMetaInfo = MetaInfo & {};
+// export type DetailMetaInfo = MetaInfo & {};
 
 export type MetaInfoList = {
   message: string;
@@ -26,12 +26,13 @@ export type ReqCreateMetaList = {
   fciGroupCode: number;
   country: string;
   kind: string;
-  childKindCodeList: number[];
-  matchingDataList: string[];
+  childKindCodeList: {id:number,kind:string}[];
+  externalDataList: string[];
 };
 
 export type RespCreateMetaList = ReqCreateMetaList & {
   message: string;
+  resultCode:string;
   id: number;
 };
 
@@ -83,19 +84,40 @@ const AnimalBreed = {
       })
       .catch((e) => console.log(e));
   },
-  createLists: async (body: ReqCreateMetaList): Promise<RespCreateMetaList> => {
+  createLists: async (body: ReqCreateMetaList, memberId: number, fciGroupCode: number): Promise<RespCreateMetaList> => {
     const tempBody = {
       ...body,
-      memberId: 0,
-      fciGroupCode: 1,
+      memberId,
+      fciGroupCode,
     };
     const result = await axiosInstance.post(`bo/v1/animals/meta`, tempBody);
 
     return result.data;
   },
-  detailLists: (metaAnimalId: number): Promise<MetaInfo> => {
+  updateLists: async (body: ReqCreateMetaList, memberId: number, fciGroupCode: number): Promise<RespCreateMetaList> => {
+    const tempBody = {
+      ...body,
+      memberId,
+      fciGroupCode,
+    };
+    const result = await axiosInstance.put(`bo/v1/animals/meta`, tempBody);
+
+    return result.data;
+  },
+  getListsPop: (
+    id?: number
+  ): Promise<{
+    metaAnimal: null | MetaInfo;
+    fciGroupCodeList: number[];
+    childKindMetaAnimalList: { id: number; kind: string }[];
+    externalDataList: string[];
+  }> => {
+    if (!id) {
+      id = 0;
+    }
+
     return axiosInstance
-      .get(`bo/v1/animals/meta/${metaAnimalId}`)
+      .get(`bo/v1/animals/meta/page?id=${id}`)
       .then((resp) => {
         console.log(resp.data);
         return resp.data;
