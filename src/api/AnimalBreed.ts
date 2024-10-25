@@ -26,14 +26,18 @@ export type ReqCreateMetaList = {
   fciGroupCode: number;
   country: string;
   kind: string;
-  childKindCodeList: {id:number,kind:string}[];
+  childKindCodeList: { id: number; kind: string }[];
   externalDataList: string[];
 };
 
 export type RespCreateMetaList = ReqCreateMetaList & {
   message: string;
-  resultCode:string;
+  resultCode: string;
   id: number;
+};
+
+export type DetailMetaInfo = MetaInfo & {
+  
 };
 
 const AnimalBreed = {
@@ -84,7 +88,11 @@ const AnimalBreed = {
       })
       .catch((e) => console.log(e));
   },
-  createLists: async (body: ReqCreateMetaList, memberId: number, fciGroupCode: number): Promise<RespCreateMetaList> => {
+  createLists: async (
+    body: ReqCreateMetaList,
+    memberId: number,
+    fciGroupCode: number
+  ): Promise<RespCreateMetaList> => {
     const tempBody = {
       ...body,
       memberId,
@@ -94,7 +102,11 @@ const AnimalBreed = {
 
     return result.data;
   },
-  updateLists: async (body: ReqCreateMetaList, memberId: number, fciGroupCode: number): Promise<RespCreateMetaList> => {
+  updateLists: async (
+    body: ReqCreateMetaList,
+    memberId: number,
+    fciGroupCode: number
+  ): Promise<RespCreateMetaList> => {
     const tempBody = {
       ...body,
       memberId,
@@ -117,7 +129,7 @@ const AnimalBreed = {
     }
 
     return axiosInstance
-      .get(`bo/v1/animals/meta/page?id=${id}`)
+      .get(`bo/v1/animals/meta/popup?id=${id}`)
       .then((resp) => {
         console.log(resp.data);
         return resp.data;

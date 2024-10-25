@@ -13,7 +13,7 @@ type Props = {
   onPopClose?: () => void;
 };
 
-const PopupType01 = ({ externalItem,selectedItem, childKindItem }: Props) => {
+const PopupType01 = ({ externalItem, selectedItem, childKindItem }: Props) => {
   const [fetchedExternalItem, setFetchedExternalItem] = useState<string[]>(
     externalItem || []
   );
