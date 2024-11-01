@@ -8,12 +8,10 @@ import { useEffect, useState } from "react";
 import MultiSelector from "../../../components/Selector/MultiSelector";
 
 type Props = {
-  externalItem?: string[];
-  childKindItem?: { id: number; kind: string }[];
   onPopClose?: () => void;
 };
 
-const PopupType02 = ({ externalItem, childKindItem, onPopClose }: Props) => {
+const PopupNew = ({ onPopClose }: Props) => {
   const navigate = useNavigate();
 
   const [selectedListItem, setSelectedListItem] = useState<ListItem>();
@@ -24,16 +22,15 @@ const PopupType02 = ({ externalItem, childKindItem, onPopClose }: Props) => {
   const [matchingData, setMatchingData] = useState<ListItem[]>([]);
 
   // fetchedExternalItem : 매칭
-  const [fetchedExternalItem, setFetchedExternalItem] = useState<string[]>(
-    externalItem || []
-  );
+  const [fetchedExternalItem, setFetchedExternalItem] = useState<string[]>([]);
   const [fetchedChildKindItem, setFetchedChildKindItem] = useState<
     { id: number; kind: string }[]
-  >(childKindItem || []);
+  >([]);
 
   const {
     register,
     handleSubmit,
+    setError,
     formState: { errors },
   } = useForm<ReqCreateMetaList>();
 
@@ -51,11 +48,8 @@ const PopupType02 = ({ externalItem, childKindItem, onPopClose }: Props) => {
   };
 
   useEffect(() => {
-    if (!externalItem || !childKindItem) {
-      console.log("성공");
-      fetchData();
-    }
-  }, [externalItem, childKindItem]);
+    fetchData();
+  }, []);
 
   const childKindList: ListItem[] = fetchedChildKindItem.map((item) => ({
     label: item.kind,
@@ -68,19 +62,25 @@ const PopupType02 = ({ externalItem, childKindItem, onPopClose }: Props) => {
   }));
 
   const submitForm: SubmitHandler<ReqCreateMetaList> = async (data) => {
+    if (!selectedListItem?.value) {
+      setError("fciGroupCode", {
+        type: "manual",
+        message: "FCI를 입력해주세요",
+      });
+      return;
+    }
+
     try {
-      await AnimalBreed.createLists(
-        {
-          ...data,
-          // childKindCodeList 가져오는 값이 이상함
-          childKindCodeList: childKind.map((item) => {
-            return { id: parseInt(item.value), kind: item.label };
-          }),
-          externalDataList: matchingData.map((item) => item.label),
-        },
-        0,
-        parseInt(selectedListItem?.value || "1")
-      );
+      await AnimalBreed.createLists({
+        ...data,
+        // childKindCodeList 가져오는 값이 이상함
+        childKindCodeList: childKind.map((item) => {
+          return parseInt(item.value);
+        }),
+        externalDataList: matchingData.map((item) => item.label),
+        memberId: 0,
+        fciGroupCode: parseInt(selectedListItem?.value),
+      });
       alert("등록 완료");
 
       if (onPopClose) {
@@ -109,49 +109,20 @@ const PopupType02 = ({ externalItem, childKindItem, onPopClose }: Props) => {
             />
             <S.ErrorMsg>{errors.kind?.message}</S.ErrorMsg>
           </li>
-          <MultiSelector
-            selected={selectChildKind?.label}
-            placeholder="선택해주세요"
-            list={childKindList}
-            onSelected={(item) => {
-              setSelectChildKind(item);
-            }}
-            title="하위 품종"
-            width="150px"
-            selectedItem={setChildKind}
-          />
-          {/* <S.ListItem>
-            <S.PartBox>
-              <h3>하위 품종</h3>
-              <MultiSelector
-                selected={selectChildKind?.label}
-                placeholder="선택해주세요"
-                list={childKindList}
-                onSelected={(item) => {
-                  setSelectChildKind(item);
-                  setChildKind((prev) => {
-                    const list = new Set([...prev, item.label]);
-                    return [...list];
-                  });
-                }}
-                width="150px"
-              />
-            </S.PartBox>
-            <S.TagBox>
-              {childKind.map((item) => (
-                <span
-                  onClick={() => {
-                    const result = childKind.filter((childKind) => 
-                      childKind !== item
-                    );
-                    setChildKind(result)
-                  }}
-                >
-                  {item}
-                </span>
-              ))}
-            </S.TagBox>
-          </S.ListItem> */}
+          <li>
+            <MultiSelector
+              selected={selectChildKind?.label}
+              placeholder="선택해주세요"
+              list={childKindList}
+              onSelected={(item) => {
+                setSelectChildKind(item);
+              }}
+              title="하위 품종"
+              width="150px"
+              selectedItem={childKind}
+              setSelectedItem={setChildKind}
+            />
+          </li>
           <li>
             <MultiSelector
               selected={matchingListItem?.label}
@@ -160,7 +131,8 @@ const PopupType02 = ({ externalItem, childKindItem, onPopClose }: Props) => {
               onSelected={(item) => setMatchingListItem(item)}
               width="150px"
               title="매칭 데이터"
-              selectedItem={setMatchingData}
+              selectedItem={matchingData}
+              setSelectedItem={setMatchingData}
             />
           </li>
           <li>
@@ -172,9 +144,26 @@ const PopupType02 = ({ externalItem, childKindItem, onPopClose }: Props) => {
               onSelected={(item) => setSelectedListItem(item)}
               width="150px"
             />
+            <input
+              type="hidden"
+              {...register("fciGroupCode", {
+                validate: {
+                  required: () => {
+                    if (!selectedListItem?.value) {
+                      return "FCI 그룹을 선택해주세요";
+                    } else {
+                      return "";
+                    }
+                  },
+                },
+              })}
+            />
+            {!selectedListItem?.value && (
+              <S.ErrorMsg>{errors.fciGroupCode?.message}</S.ErrorMsg>
+            )}
           </li>
           <li>
-            <h3>출생지 :</h3>
+            <h3>출생지</h3>
             <S.PopInput
               {...register("country", {
                 required: { value: true, message: "출생지를 입력해주세요" },
@@ -184,13 +173,12 @@ const PopupType02 = ({ externalItem, childKindItem, onPopClose }: Props) => {
             <S.ErrorMsg>{errors.country?.message}</S.ErrorMsg>
           </li>
         </ul>
-        {/* 버튼은 form 안에 넣기 !!! - 다시 수정 */}
         <S.ButtonRow>
-          <button type="submit">저장</button>
+          <button type="submit">등록</button>
         </S.ButtonRow>
       </S.CreateForm>
     </S.PopContainer>
   );
 };
 
-export default PopupType02;
+export default PopupNew;

@@ -56,11 +56,17 @@ export const ItemList = styled.ul`
 export const ListItem = styled.li`
   display: block !important;
 `;
+
+export const MultiSelectorItem = styled.div`
+  display: block !important;
+`;
+
 export const PartBox = styled.div`
   display: flex;
   align-items: center;
   gap: 10px;
 `;
+
 export const TagBox = styled.div`
   display: flex;
   flex-wrap: wrap;

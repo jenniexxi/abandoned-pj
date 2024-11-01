@@ -6,12 +6,10 @@ export type MetaInfo = {
   fciGroupCode: number;
   country: string;
   kind: string;
-  childKindCodeList: number[];
+  childKindCodeList: { id: number; kind: string }[];
   externalDataList: string[];
   updatedAt: string;
 };
-
-// export type DetailMetaInfo = MetaInfo & {};
 
 export type MetaInfoList = {
   message: string;
@@ -26,19 +24,22 @@ export type ReqCreateMetaList = {
   fciGroupCode: number;
   country: string;
   kind: string;
-  childKindCodeList: { id: number; kind: string }[];
+  childKindCodeList: number[];
   externalDataList: string[];
 };
 
-export type RespCreateMetaList = ReqCreateMetaList & {
+export type ReqUpdateMetaList = ReqCreateMetaList & { id: number };
+
+export type RespCreateMetaList = MetaInfo & {
   message: string;
-  resultCode: string;
-  id: number;
 };
 
-export type DetailMetaInfo = MetaInfo & {
-  
-};
+/**
+ * @getLists : 목록 조회
+ * @createLists : 생성
+ * @updateLists : 수정
+ * @getListsPop : 팝업조회
+ */
 
 const AnimalBreed = {
   // getDetail: (id: number): Promise<MetaInfo[]> => {
@@ -88,31 +89,19 @@ const AnimalBreed = {
       })
       .catch((e) => console.log(e));
   },
-  createLists: async (
-    body: ReqCreateMetaList,
-    memberId: number,
-    fciGroupCode: number
-  ): Promise<RespCreateMetaList> => {
-    const tempBody = {
-      ...body,
-      memberId,
-      fciGroupCode,
-    };
-    const result = await axiosInstance.post(`bo/v1/animals/meta`, tempBody);
+  createLists: async (body: ReqCreateMetaList): Promise<RespCreateMetaList> => {
+    const result = await axiosInstance.post(`bo/v1/animals/meta`, body);
 
     return result.data;
   },
   updateLists: async (
-    body: ReqCreateMetaList,
-    memberId: number,
-    fciGroupCode: number
+    body: ReqUpdateMetaList,
+    metaAnimalId: number
   ): Promise<RespCreateMetaList> => {
-    const tempBody = {
-      ...body,
-      memberId,
-      fciGroupCode,
-    };
-    const result = await axiosInstance.put(`bo/v1/animals/meta`, tempBody);
+    const result = await axiosInstance.put(
+      `bo/v1/animals/meta/${metaAnimalId}`,
+      body
+    );
 
     return result.data;
   },

@@ -8,10 +8,11 @@ import AnimalBreed, { MetaInfo, MetaInfoList } from "../../api/AnimalBreed";
 import Selector, { ListItem } from "../../components/Selector/Selector";
 import dayjs from "dayjs";
 import Pagination from "../../components/Pagination/Pagination";
-import PopupType01 from "./features/PopupType01";
-import PopupType02 from "./features/PopupType02";
+import PopupDetail from "./features/PopupDetail";
+import PopupModify from "./features/PopupModify";
+import PopupNew from "./features/PopupNew";
 
-type PopupType = "type1" | "type2" | "type3";
+type PopupType = "detail" | "new" | "modify";
 
 const BreedMng = () => {
   const [isPopup, setIsPopup] = useState(false);
@@ -22,7 +23,7 @@ const BreedMng = () => {
   const [selectFCI, setSelectFCI] = useState<ListItem>();
   const [selectCountry, setSelectCountry] = useState<ListItem>();
   const [selectedItem, setSelectedItem] = useState<MetaInfo>();
-  const [popupType, setPopupType] = useState<PopupType>("type1");
+  const [popupType, setPopupType] = useState<PopupType>("detail");
   const [page, setPage] = useState(0);
   const [searchInput, setSearchInput] = useState("");
   const [searhResult, setSearhResult] = useState<MetaInfoList>();
@@ -47,8 +48,9 @@ const BreedMng = () => {
 
   useEffect(() => {
     AnimalBreed.getLists(undefined, undefined, undefined, page + 1).then(
-      (resp) => {setSearhResult(resp);
-        console.log(resp)
+      (resp) => {
+        setSearhResult(resp);
+        console.log(resp);
       }
     );
   }, [page]);
@@ -131,9 +133,10 @@ const BreedMng = () => {
             <S.SearchCase>{searhResult?.count}건</S.SearchCase>
             <S.InfoBox>
               <p>
-                *총 <span>{searhResult?.misMatchingCount}</span>건의 미매칭 데이터가 있습니다.
+                *총 <span>{searhResult?.misMatchingCount}</span>건의 미매칭
+                데이터가 있습니다.
               </p>
-              <button onClick={() => popupOpen("type2")}>신규 작성</button>
+              <button onClick={() => popupOpen("new")}>신규 작성</button>
             </S.InfoBox>
           </S.TableInfoWrap>
           <S.TableContainer>
@@ -154,7 +157,7 @@ const BreedMng = () => {
                     key={item.id}
                     onClick={() => {
                       onClickListTr(item);
-                      popupOpen("type1");
+                      popupOpen("detail");
                     }}
                   >
                     <td>{item.fciGroupCode}</td>
@@ -165,7 +168,13 @@ const BreedMng = () => {
                       {dayjs(item.updatedAt).format("YY.MM.DD")} |
                       {item.memberName}
                     </td>
-                    <td>
+                    <td
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onClickListTr(item);
+                        popupOpen("modify");
+                      }}
+                    >
                       <button>수정</button>
                     </td>
                   </tr>
@@ -190,16 +199,28 @@ const BreedMng = () => {
             // isCloseBtn={false}
             onHide={popupClose}
           >
-            {popupType === "type1" && (
-              <PopupType01 selectedItem={selectedItem} />
-            )}
-            {popupType === "type2" && (
-              <PopupType02
+            {/* 
+              @PopupDetail - 자세히보기
+              @PopupNew - 신규
+              @PopupModify - 수정
+            */}
+            {popupType === "detail" && (
+              <PopupDetail
+                selectedItem={selectedItem}
                 onPopClose={popupClose}
-                externalItem={selectedItem?.externalDataList}
               />
             )}
-            {popupType === "type3" && <></>}
+            {popupType === "new" && (
+              <PopupNew
+                onPopClose={popupClose}
+              />
+            )}
+            {popupType === "modify" && (
+              <PopupModify
+                selectedItem={selectedItem}
+                onPopClose={popupClose}
+              />
+            )}
           </Modal>
         </Portal>
       )}

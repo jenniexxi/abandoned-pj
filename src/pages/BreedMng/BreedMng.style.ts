@@ -180,6 +180,12 @@ export const VarietyList = styled.ul`
   }
 `;
 
+export const NodataChildKind = styled.div`
+  font-size: 14px;
+  color: #aaa;
+  margin-top: 10px;
+`;
+
 export const DataBox = styled.div`
   border: 1px solid #d9d9d9;
   padding: 5px 5px 0;
@@ -232,6 +238,7 @@ export const CreateForm = styled.form`
       h3 {
         font-weight: bold;
         flex-shrink: 0;
+        width: 70px;
       }
       input {
         flex: 1;

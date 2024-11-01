@@ -11,12 +11,6 @@ const Aside = () => {
         <li>
           <S.TextLink to="/">Home</S.TextLink>
         </li>
-        <li>
-          <S.TextLink to="/">menu1</S.TextLink>
-        </li>
-        <li>
-          <S.TextLink to="/">menu2</S.TextLink>
-        </li>
       </S.MenuList>
     </S.Asidewrap>
   );

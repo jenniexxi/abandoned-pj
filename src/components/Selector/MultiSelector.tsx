@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import * as S from "./Selector.style";
 import Arrow from "../../resources/svg/arrow";
+// import { uniq } from "lodash";
 
 export type ListItem = {
   label: string;
@@ -14,7 +15,8 @@ type Props = {
   onSelected: (item: ListItem) => void;
   width?: string;
   title?: string;
-  selectedItem: (items: ListItem[]) => void;
+  selectedItem?: ListItem[];
+  setSelectedItem: (items: ListItem[]) => void;
 };
 
 const MultiSelector = ({
@@ -24,10 +26,10 @@ const MultiSelector = ({
   onSelected,
   width,
   title,
-  selectedItem,
+  selectedItem = [],
+  setSelectedItem,
 }: Props) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [childKind, setChildKind] = useState<ListItem[]>([]);
   const selectorRef = useRef<HTMLDivElement>(null); //외부 클릭시 감지
 
   useEffect(() => {
@@ -51,7 +53,7 @@ const MultiSelector = ({
   };
 
   return (
-    <S.ListItem>
+    <S.MultiSelectorItem>
       <S.PartBox>
         <h3>{title}</h3>
         <S.SelectBox ref={selectorRef} $width={width}>
@@ -72,14 +74,11 @@ const MultiSelector = ({
               {list.map((item) => {
                 return (
                   <li
-                    key={item.label}
+                    key={item.label + item.value}
                     onClick={() => {
                       onSelected(item);
-                      setChildKind((prev) => {
-                        const list = new Set([...prev, item]);
-                        selectedItem([...list]);
-                        return [...list];
-                      });
+                      // setSelectedItem(uniq([...selectedItem, item]));
+                      setSelectedItem([...selectedItem, item]);
                     }}
                   >
                     {item.label}
@@ -91,21 +90,21 @@ const MultiSelector = ({
         </S.SelectBox>
       </S.PartBox>
       <S.TagBox>
-        {childKind.map((item) => (
+        {selectedItem.map((item, index) => (
           <span
+            key={item.label + item.value + index}
             onClick={() => {
-              const result = childKind.filter(
-                (childKind) => childKind !== item
+              const result = selectedItem.filter(
+                (selectedItem) => selectedItem !== item
               );
-              selectedItem(result);
-              setChildKind(result);
+              setSelectedItem(result);
             }}
           >
             {item.label}
           </span>
         ))}
       </S.TagBox>
-    </S.ListItem>
+    </S.MultiSelectorItem>
   );
 };
 
